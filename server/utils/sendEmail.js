@@ -12,6 +12,7 @@ const transporter = nodemailer.createTransport({
     tls: {
         rejectUnauthorized: false, // Bypass SSL certificate verification issues on cloud servers
     },
+    family: 4, // Force IPv4 resolution to prevent ENETUNREACH errors on IPv6-unsupported cloud environments
     connectionTimeout: 10000, // 10 seconds timeout for establishing connection
     greetingTimeout: 10000,   // 10 seconds timeout for SMTP greeting response
     socketTimeout: 10000,     // 10 seconds timeout for socket inactivity
