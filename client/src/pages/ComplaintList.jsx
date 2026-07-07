@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import API from "../services/api";
+import API, { getUploadsUrl } from "../services/api";
 import { toast } from "react-toastify";
 import { Link } from "react-router-dom";
 
@@ -229,7 +229,7 @@ fetchComplaints();
     {item.photo ? (
 
         <img
-            src={`http://localhost:5000/uploads/${item.photo}`}
+            src={getUploadsUrl(item.photo)}
             alt="Complaint"
             width="60"
             height="60"

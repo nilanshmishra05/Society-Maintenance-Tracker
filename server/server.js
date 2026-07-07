@@ -1,3 +1,4 @@
+require("dotenv").config();
 const complaintRoutes=require("./routes/ComplaintRoutes");
 const cron = require("node-cron");
 const checkOverdueComplaints = require("./jobs/overdueChecker");
@@ -5,15 +6,12 @@ const residentRoutes = require("./routes/residentRoutes");
 const adminRoutes = require("./routes/adminRoutes");
 const authRoutes = require("./routes/authRoutes");
 const express = require("express");
-const dotenv = require("dotenv");
 const cors = require("cors");
 const helmet = require("helmet");
 const morgan = require("morgan");
 const cookieParser = require("cookie-parser");
 
 const connectDB = require("./config/db");
-
-dotenv.config();
 
 connectDB();
 
@@ -44,11 +42,12 @@ app.use(express.urlencoded({ extended: true }));
 
 app.use(cookieParser());
 
-app.use(helmet());
+app.use(helmet({ crossOriginResourcePolicy: { policy: "cross-origin" } }));
 
 app.use(morgan("dev"));
 
-app.use("/uploads", express.static("uploads"));
+const path = require("path");
+app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
 
 app.get("/", (req, res) => {

@@ -108,19 +108,23 @@ function Login() {
 
                         </button>
                         <div className="text-center mt-3">
-
-    <p className="mb-1">
-        Don't have an account?
-    </p>
-
-    <Link
-        to="/register"
-        className="text-decoration-none fw-bold"
-    >
-        Register Here
-    </Link>
-
-</div>
+                            <p className="mb-1">
+                                Don't have an account?
+                            </p>
+                            <Link
+                                to="/register"
+                                className="text-decoration-none fw-bold me-2"
+                            >
+                                Register Here
+                            </Link>
+                            <span className="text-muted">|</span>
+                            <Link
+                                to="/forgot-password"
+                                className="text-decoration-none fw-bold ms-2"
+                            >
+                                Forgot Password?
+                            </Link>
+                        </div>
 
                     </div>
 

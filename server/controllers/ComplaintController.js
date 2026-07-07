@@ -1,6 +1,7 @@
 const Complaint = require("../models/Complaint");
 const ComplaintHistory = require("../models/ComplaintHistory");
 const sendEmail = require("../utils/sendEmail");
+const User = require("../models/User");
 const mongoose = require("mongoose");
 // ======================================
 // Resident Create Complaint
@@ -36,29 +37,32 @@ exports.createComplaint = async (req, res) => {
 
         });
 
-        await sendEmail(
-    req.user.email,
-    "Complaint Registered Successfully",
-    `
-    <h2>Hello ${req.user.name}</h2>
+        // Send email in the background without blocking the HTTP response or throwing if it fails
+        sendEmail(
+            req.user.email,
+            "Complaint Registered Successfully",
+            `
+            <h2>Hello ${req.user.name}</h2>
 
-    <p>Your complaint has been registered successfully.</p>
+            <p>Your complaint has been registered successfully.</p>
 
-    <hr>
+            <hr>
 
-    <b>Category:</b> ${complaint.category}<br>
+            <b>Category:</b> ${complaint.category}<br>
 
-    <b>Description:</b> ${complaint.description}<br>
+            <b>Description:</b> ${complaint.description}<br>
 
-    <b>Status:</b> ${complaint.status}<br>
+            <b>Status:</b> ${complaint.status}<br>
 
-    <b>Priority:</b> ${complaint.priority}
+            <b>Priority:</b> ${complaint.priority}
 
-    <hr>
+            <hr>
 
-    <p>Thank you.</p>
-    `
-);
+            <p>Thank you.</p>
+            `
+        ).catch((emailError) => {
+            console.error("Complaint registration email failed to send:", emailError.message);
+        });
 
         res.status(201).json({
 
@@ -230,6 +234,30 @@ exports.updateComplaintStatus = async (req, res) => {
       note: "Status Updated",
     });
 
+    // Notify resident by email in background
+    User.findById(complaint.resident).then((residentUser) => {
+      if (residentUser && residentUser.email) {
+        sendEmail(
+          residentUser.email,
+          `Complaint Status Updated: ${complaint.category}`,
+          `
+          <h2>Hello ${residentUser.name}</h2>
+          <p>Your complaint status has been updated.</p>
+          <hr>
+          <p><b>Category:</b> ${complaint.category}</p>
+          <p><b>Description:</b> ${complaint.description}</p>
+          <p><b>New Status:</b> <span style="color: #007bff; font-weight: bold;">${complaint.status}</span></p>
+          <hr>
+          <p>Thank you for using Society Maintenance Tracker.</p>
+          `
+        ).catch((emailError) => {
+          console.error("Failed to send status update email:", emailError.message);
+        });
+      }
+    }).catch((err) => {
+      console.error("Failed to find resident for email notification:", err.message);
+    });
+
     res.json({
       success: true,
       message: "Status Updated Successfully",
@@ -267,6 +295,30 @@ exports.updatePriority = async (req, res) => {
     complaint.priority = req.body.priority;
 
     await complaint.save();
+
+    // Notify resident by email in background
+    User.findById(complaint.resident).then((residentUser) => {
+      if (residentUser && residentUser.email) {
+        sendEmail(
+          residentUser.email,
+          `Complaint Priority Updated: ${complaint.category}`,
+          `
+          <h2>Hello ${residentUser.name}</h2>
+          <p>Your complaint priority has been updated.</p>
+          <hr>
+          <p><b>Category:</b> ${complaint.category}</p>
+          <p><b>Description:</b> ${complaint.description}</p>
+          <p><b>New Priority:</b> <span style="color: #ffc107; font-weight: bold;">${complaint.priority}</span></p>
+          <hr>
+          <p>Thank you for using Society Maintenance Tracker.</p>
+          `
+        ).catch((emailError) => {
+          console.error("Failed to send priority update email:", emailError.message);
+        });
+      }
+    }).catch((err) => {
+      console.error("Failed to find resident for email notification:", err.message);
+    });
 
     res.json({
       success: true,

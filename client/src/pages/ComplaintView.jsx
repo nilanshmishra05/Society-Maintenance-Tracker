@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import API from "../services/api";
+import API, { getUploadsUrl } from "../services/api";
 import { Link } from "react-router-dom";
 
 function ComplaintView() {
@@ -146,7 +146,7 @@ function ComplaintView() {
 
                         <img
 
-                            src={`http://localhost:5000/uploads/${complaint.photo}`}
+                            src={getUploadsUrl(complaint.photo)}
 
                             alt="Complaint"
 
