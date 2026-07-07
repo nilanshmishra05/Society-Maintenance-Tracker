@@ -1,5 +1,6 @@
 require("dotenv").config();
 const nodemailer = require("nodemailer");
+const dns = require("dns");
 
 const transporter = nodemailer.createTransport({
     host: "smtp.gmail.com",
@@ -11,6 +12,9 @@ const transporter = nodemailer.createTransport({
     },
     tls: {
         rejectUnauthorized: false, // Bypass SSL certificate verification issues on cloud servers
+    },
+    lookup: (hostname, options, callback) => {
+        dns.lookup(hostname, { family: 4 }, callback);
     },
     family: 4, // Force IPv4 to prevent ENETUNREACH errors on hosts without IPv6 routing
     connectionTimeout: 10000, // 10 seconds timeout for establishing connection
