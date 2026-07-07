@@ -2,14 +2,19 @@ require("dotenv").config();
 const nodemailer = require("nodemailer");
 
 const transporter = nodemailer.createTransport({
-    service: "gmail",
+    host: "smtp.gmail.com",
+    port: 465,
+    secure: true, // true for 465, false for other ports
     auth: {
         user: process.env.EMAIL_USER,
         pass: process.env.EMAIL_PASS,
     },
-    connectionTimeout: 5000, // 5 seconds timeout for establishing connection
-    greetingTimeout: 5000,   // 5 seconds timeout for SMTP greeting response
-    socketTimeout: 5000,     // 5 seconds timeout for socket inactivity
+    tls: {
+        rejectUnauthorized: false, // Bypass SSL certificate verification issues on cloud servers
+    },
+    connectionTimeout: 10000, // 10 seconds timeout for establishing connection
+    greetingTimeout: 10000,   // 10 seconds timeout for SMTP greeting response
+    socketTimeout: 10000,     // 10 seconds timeout for socket inactivity
 });
 
 const sendEmail = async (to, subject, html) => {
