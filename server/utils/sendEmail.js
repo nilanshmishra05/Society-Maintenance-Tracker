@@ -24,7 +24,44 @@ const transporter = nodemailer.createTransport({
 });
 
 const sendEmail = async (to, subject, html) => {
-    // If Resend API Key is configured (ideal for production cloud servers like Render to bypass SMTP blocks)
+    // 1. If Brevo (Sendinblue) API Key is configured (Sends to anyone for free without custom domain!)
+    if (process.env.BREVO_API_KEY) {
+        try {
+            const senderEmail = process.env.EMAIL_USER || "nilanshmishra05@gmail.com";
+            const response = await fetch("https://api.brevo.com/v3/smtp/email", {
+                method: "POST",
+                headers: {
+                    "accept": "application/json",
+                    "api-key": process.env.BREVO_API_KEY,
+                    "content-type": "application/json",
+                },
+                body: JSON.stringify({
+                    sender: {
+                        name: "Society Maintenance Tracker",
+                        email: senderEmail,
+                    },
+                    to: [
+                        {
+                            email: to,
+                        }
+                    ],
+                    subject: subject,
+                    htmlContent: html,
+                }),
+            });
+            const data = await response.json();
+            if (!response.ok) {
+                throw new Error(data.message || "Failed to send email via Brevo API");
+            }
+            console.log("Email Sent Successfully via Brevo HTTP API");
+            return data;
+        } catch (error) {
+            console.error("Brevo API Error:", error.message);
+            throw error;
+        }
+    }
+
+    // 2. If Resend API Key is configured
     if (process.env.RESEND_API_KEY) {
         try {
             const response = await fetch("https://api.resend.com/emails", {
@@ -52,7 +89,7 @@ const sendEmail = async (to, subject, html) => {
         }
     }
 
-    // Fallback to local SMTP (Gmail)
+    // 3. Fallback to local SMTP (Gmail)
     try {
         await transporter.sendMail({
             from: `"Society Maintenance Tracker" <${process.env.EMAIL_USER}>`,
